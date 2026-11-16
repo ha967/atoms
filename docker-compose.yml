@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: atoms-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: atoms
+      POSTGRES_PASSWORD: atoms
+      POSTGRES_DB: atoms
+    ports:
+      - "5433:5432"
+    volumes:
+      - atoms-db-data:/var/lib/postgresql/data
+
+volumes:
+  atoms-db-data:

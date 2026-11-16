@@ -10,12 +10,10 @@
 
 ## 文档索引
 
-| 文档 | 内容 |
-| --- | --- |
+| 文档                                             | 内容                                                                 |
+| ------------------------------------------------ | -------------------------------------------------------------------- |
 | [docs/架构与实现过程.md](docs/架构与实现过程.md) | 完整实现过程、系统架构、数据模型、API 规格、时序、关键细节、验证记录 |
-| [docs/实现说明.md](docs/实现说明.md) | 设计取舍、完成度、未做项、后续优先级、3 分钟演示脚本 |
-| [docs/目标.md](docs/目标.md) | 题目要求 |
-| [docs/避坑.md](docs/避坑.md) | 笔试注意事项与交付检查清单 |
+| [docs/实现说明.md](docs/实现说明.md)             | 设计取舍、完成度、未做项、后续优先级、3 分钟演示脚本                 |
 
 ## 核心闭环
 
@@ -33,14 +31,14 @@
 
 与题目要求的对应关系：
 
-| 题目要求 | 实现 |
-| --- | --- |
+| 题目要求                | 实现                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------- |
 | 智能体驱动生成代码/应用 | `src/lib/llm.ts` + `src/lib/prompts.ts`，OpenAI 兼容协议，可切换 DeepSeek / 通义千问 / OpenRouter |
-| 生成结果可视化展示 | `iframe srcDoc` 直接运行单文件 HTML，沙箱隔离 |
-| 真实交互 | 生成物本身可操作；宿主应用有赛马进度、版本切换、手动选择等真实交互 |
-| 数据持久化 | PostgreSQL + Drizzle ORM：用户、项目、生成批次、候选方案、版本全部落库 |
-| 基本使用流程 | 昵称登录 → 新建项目 → 赛马生成 → 预览 → 迭代 |
-| 延展能力 | 赛马模式（多路并行 + 评分择优）、对话式迭代、版本历史、分享链接、导出 |
+| 生成结果可视化展示      | `iframe srcDoc` 直接运行单文件 HTML，沙箱隔离                                                     |
+| 真实交互                | 生成物本身可操作；宿主应用有赛马进度、版本切换、手动选择等真实交互                                |
+| 数据持久化              | PostgreSQL + Drizzle ORM：用户、项目、生成批次、候选方案、版本全部落库                            |
+| 基本使用流程            | 昵称登录 → 新建项目 → 赛马生成 → 预览 → 迭代                                                      |
+| 延展能力                | 赛马模式（多路并行 + 评分择优）、对话式迭代、版本历史、分享链接、导出                             |
 
 ## 功能清单
 
@@ -59,13 +57,13 @@
 
 ## 技术栈
 
-| 层 | 选择 | 说明 |
-| --- | --- | --- |
-| 框架 | Next.js 16（App Router / Turbopack） | 前后端一体，Route Handler 直接写 SSE |
-| UI | React 19 + TypeScript strict + Tailwind CSS 4 | 无额外组件库，样式集中在 `globals.css` |
-| 数据 | PostgreSQL + Drizzle ORM | 本地 Docker，线上 Neon，同一套代码 |
-| 模型 | OpenAI Chat Completions 兼容协议 | 原生 `fetch`，无 SDK 绑定，换模型只改环境变量 |
-| 流式 | Server-Sent Events | 每路生成完成即推送，不用等全部结束 |
+| 层   | 选择                                          | 说明                                          |
+| ---- | --------------------------------------------- | --------------------------------------------- |
+| 框架 | Next.js 16（App Router / Turbopack）          | 前后端一体，Route Handler 直接写 SSE          |
+| UI   | React 19 + TypeScript strict + Tailwind CSS 4 | 无额外组件库，样式集中在 `globals.css`        |
+| 数据 | PostgreSQL + Drizzle ORM                      | 本地 Docker，线上 Neon，同一套代码            |
+| 模型 | OpenAI Chat Completions 兼容协议              | 原生 `fetch`，无 SDK 绑定，换模型只改环境变量 |
+| 流式 | Server-Sent Events                            | 每路生成完成即推送，不用等全部结束            |
 
 ## 本地运行
 
@@ -108,11 +106,11 @@ LLM_JUDGE_MODEL=deepseek-chat
 
 常见端点：
 
-| 服务 | LLM_BASE_URL | LLM_MODEL |
-| --- | --- | --- |
-| DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat` |
-| 通义千问 | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` |
-| OpenRouter | `https://openrouter.ai/api/v1` | 任意模型 id |
+| 服务       | LLM_BASE_URL                                        | LLM_MODEL       |
+| ---------- | --------------------------------------------------- | --------------- |
+| DeepSeek   | `https://api.deepseek.com/v1`                       | `deepseek-chat` |
+| 通义千问   | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus`     |
+| OpenRouter | `https://openrouter.ai/api/v1`                      | 任意模型 id     |
 
 如需强制演示模式，设置 `LLM_MODE=mock`；强制使用真实模型设置 `LLM_MODE=live`。
 
@@ -133,16 +131,16 @@ npm run test:e2e    # 真实浏览器端到端冒烟测试
 
 ## 环境变量
 
-| 变量 | 必填 | 说明 |
-| --- | --- | --- |
-| `DATABASE_URL` | 是 | PostgreSQL 连接串，线上建议用 Neon 的 pooled 连接串 |
-| `SESSION_SECRET` | 是 | 会话 Cookie 签名密钥，生产必须替换为随机长字符串 |
-| `LLM_BASE_URL` | 否 | 默认 `https://api.deepseek.com/v1` |
-| `LLM_API_KEY` | 否 | 为空则进入演示模式 |
-| `LLM_MODEL` | 否 | 默认 `deepseek-chat` |
-| `LLM_JUDGE_MODEL` | 否 | 评审模型，默认与生成模型相同 |
-| `LLM_TIMEOUT_MS` | 否 | 单次生成超时，默认 120000 |
-| `LLM_MODE` | 否 | `mock` / `live` / 留空自动判断 |
+| 变量              | 必填 | 说明                                                |
+| ----------------- | ---- | --------------------------------------------------- |
+| `DATABASE_URL`    | 是   | PostgreSQL 连接串，线上建议用 Neon 的 pooled 连接串 |
+| `SESSION_SECRET`  | 是   | 会话 Cookie 签名密钥，生产必须替换为随机长字符串    |
+| `LLM_BASE_URL`    | 否   | 默认 `https://api.deepseek.com/v1`                  |
+| `LLM_API_KEY`     | 否   | 为空则进入演示模式                                  |
+| `LLM_MODEL`       | 否   | 默认 `deepseek-chat`                                |
+| `LLM_JUDGE_MODEL` | 否   | 评审模型，默认与生成模型相同                        |
+| `LLM_TIMEOUT_MS`  | 否   | 单次生成超时，默认 120000                           |
+| `LLM_MODE`        | 否   | `mock` / `live` / 留空自动判断                      |
 
 ## 部署（Vercel + Neon）
 

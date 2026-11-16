@@ -22,27 +22,28 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/app';
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
-      <div className="glow left-1/2 top-[-160px] h-[320px] w-[560px] -translate-x-1/2 bg-[#5b3df5]" />
-      <div className="relative z-10 w-full max-w-sm">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="flex min-h-screen justify-center px-6 py-14 sm:py-20">
+      <div className="w-full max-w-[380px]">
+        <div className="flex items-center justify-between">
           <Logo />
-          <Link href="/" className="flex items-center gap-1 text-xs text-muted transition hover:text-text">
-            <ArrowLeft size={13} />
+          <Link href="/" className="btn btn-quiet btn-sm">
+            <ArrowLeft size={12} />
             返回首页
           </Link>
         </div>
-        <div className="panel-strong p-6">
-          <h1 className="text-xl font-semibold tracking-tight">进入工作台</h1>
-          <p className="mt-1.5 text-xs leading-relaxed text-muted">
-            一个昵称就够了。系统会为你创建独立的工作区，项目与版本都保存到数据库。
+
+        <div className="mt-10 border border-rule bg-bg-2/40 p-6">
+          <h1 className="display text-[20px]">进入工作台</h1>
+          <p className="mt-2 text-[12px] leading-relaxed text-muted">
+            取一个昵称就行。系统会为你开一个独立工作区，项目与版本都保存到数据库。
           </p>
           <div className="mt-6">
             <LoginForm next={safeNext} />
           </div>
         </div>
-        <p className="mt-4 text-center text-[11px] leading-relaxed text-muted">
-          这是笔试演示版本，不收集邮箱、密码或任何第三方账号信息。
+
+        <p className="mt-3.5 text-[10.5px] leading-relaxed text-faint">
+          这是演示版本，不收集邮箱、密码或任何第三方账号信息。
         </p>
       </div>
     </div>

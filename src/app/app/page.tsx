@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { desc, eq, sql } from 'drizzle-orm';
-import { ArrowUpRight, FolderOpen, Sparkles } from 'lucide-react';
 import { db } from '@/db';
 import { projects, variants } from '@/db/schema';
 import { Logo } from '@/components/Logo';
@@ -19,6 +18,18 @@ function formatDate(date: Date): string {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
+}
+
+function scoreTone(score: number): string {
+  if (score >= 85) {
+    return 'text-success';
+  }
+
+  if (score >= 70) {
+    return 'text-warning';
+  }
+
+  return 'text-danger';
 }
 
 export default async function DashboardPage() {
@@ -47,87 +58,94 @@ export default async function DashboardPage() {
   const completed = rows.filter((row) => row.bestScore !== null).length;
 
   return (
-    <div className="relative min-h-screen">
-      <div className="glow right-[-160px] top-[-160px] h-[300px] w-[420px] bg-[#5b3df5]" />
-
-      <header className="relative z-10 border-b border-border">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
+    <div className="min-h-screen">
+      <header className="border-b border-rule">
+        <div className="mx-auto flex h-14 w-full max-w-[1180px] items-center justify-between px-4">
           <Logo href="/app" />
           <LogoutButton nickname={user.nickname} />
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-20">
-        <section className="flex flex-wrap items-end justify-between gap-4 pt-10">
+      <main className="mx-auto w-full max-w-[1180px] px-4 pb-14">
+        <section className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5 pt-9 pb-7">
           <div>
-            <p className="label">Workspace</p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-              {user.nickname}，今天想造点什么？
-            </h1>
-            <p className="mt-2 text-sm text-muted">
-              共 {rows.length} 个项目 · {completed} 个已有可用方案
-              {config.mock ? ' · 当前为演示模式' : ' · 已接入模型'}
+            <h1 className="display text-[24px] sm:text-[27px]">{user.nickname}，今天造点什么？</h1>
+            <p className="mt-2 text-[12px] text-muted">
+              写一句需求，让 2–3 路智能体并行跑一遍，再由评审挑出一版。
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-border bg-white/[0.03] px-3 py-1.5 text-[11px] text-muted">
-            <Sparkles size={12} className="text-accent-strong" />
-            赛马模式已开启
-          </div>
+
+          <dl className="grid grid-cols-[auto_auto] items-baseline gap-x-5 gap-y-1">
+            <dt className="text-[10.5px] text-faint">项目</dt>
+            <dd className="num text-right text-[13px]">{rows.length}</dd>
+            <dt className="text-[10.5px] text-faint">已有可用方案</dt>
+            <dd className="num text-right text-[13px]">{completed}</dd>
+            <dt className="text-[10.5px] text-faint">模型</dt>
+            <dd className="text-right text-[12px] text-muted">{config.mock ? '内置示例' : '已接入'}</dd>
+          </dl>
         </section>
 
-        <section className="mt-6">
-          <NewProjectForm mockMode={config.mock} />
-        </section>
+        <NewProjectForm mockMode={config.mock} />
 
-        <section className="mt-10">
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
-              <FolderOpen size={15} className="text-accent-strong" />
-              我的项目
-            </h2>
-            <span className="text-[11px] text-muted">按最近更新排序</span>
+        <section className="mt-11">
+          <div className="section-head">
+            <h2 className="text-[13px] font-semibold">我的项目</h2>
+            <span className="text-[10.5px] text-faint">共 <span className="num">{rows.length}</span> 个</span>
+            <span className="ml-auto text-[11px] text-faint">按最近更新排序</span>
           </div>
 
           {rows.length === 0 ? (
-            <div className="panel mt-3 flex flex-col items-center gap-2 px-6 py-14 text-center">
-              <p className="text-sm font-medium">还没有项目</p>
-              <p className="max-w-sm text-xs leading-relaxed text-muted">
-                在上面的输入框写一句需求，比如「带优先级和拖拽排序的项目看板」，然后点击「开始赛马」。
+            <div className="border-b border-rule-soft py-14 text-center">
+              <p className="text-[13px] font-medium">还没有项目</p>
+              <p className="mx-auto mt-1.5 max-w-sm text-[12px] leading-relaxed text-muted">
+                在上面写一句需求，比如「带优先级和拖拽排序的项目看板」，然后点「开始赛马」。
               </p>
             </div>
           ) : (
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <div className="hidden grid-cols-[minmax(0,1fr)_84px_92px_104px] gap-x-4 border-b border-rule-soft py-2 text-[10.5px] text-faint sm:grid">
+                <span>需求</span>
+                <span className="text-right">方案</span>
+                <span className="text-right">最高分</span>
+                <span className="text-right">更新</span>
+              </div>
+
               {rows.map((row) => (
                 <Link
                   key={row.id}
                   href={`/p/${row.id}`}
-                  className="panel group flex flex-col p-4 transition hover:border-border-strong hover:bg-white/[0.05]"
+                  className="flex flex-col gap-1.5 border-b border-rule-soft py-3.5 transition-colors hover:bg-white/[0.035] sm:grid sm:grid-cols-[minmax(0,1fr)_84px_92px_104px] sm:items-center sm:gap-x-4 sm:gap-y-0"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="line-clamp-1 text-sm font-semibold">{row.title}</h3>
-                    <ArrowUpRight
-                      size={15}
-                      className="shrink-0 text-muted transition group-hover:text-accent-strong"
-                    />
-                  </div>
-                  <p className="mt-2 line-clamp-2 min-h-[32px] text-xs leading-relaxed text-muted">{row.prompt}</p>
-                  <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted">
-                    <span>{row.variantCount} 个方案</span>
-                    <div className="flex items-center gap-2">
+                  <span className="min-w-0">
+                    <span className="block truncate text-[13px] font-medium">{row.title}</span>
+                    <span className="mt-0.5 block truncate text-[11.5px] text-faint">{row.prompt}</span>
+                  </span>
+                  <span className="flex items-baseline gap-3 text-[11px] text-muted sm:contents">
+                    <span className="num sm:text-right">{row.variantCount} 个方案</span>
+                    <span className="sm:text-right">
                       {row.bestScore !== null ? (
-                        <span className="rounded-full border border-success/30 bg-success/10 px-2 py-0.5 font-semibold text-success">
-                          最高 {Number(row.bestScore)} 分
+                        <span className={`num text-[12.5px] ${scoreTone(Number(row.bestScore))}`}>
+                          {Number(row.bestScore)}
                         </span>
-                      ) : null}
-                      <span>{formatDate(row.updatedAt)}</span>
-                    </div>
-                  </div>
+                      ) : (
+                        <span className="text-[11.5px] text-faint">未评审</span>
+                      )}
+                    </span>
+                    <span className="num text-faint sm:text-right">{formatDate(row.updatedAt)}</span>
+                  </span>
                 </Link>
               ))}
             </div>
           )}
         </section>
       </main>
+
+      <footer className="border-t border-rule">
+        <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-1 px-4 py-5 text-[10.5px] text-faint sm:flex-row sm:items-center sm:justify-between">
+          <span>Atoms Demo · 项目与版本保存在服务端</span>
+          <span className="num">Next.js 16 · Drizzle · PostgreSQL</span>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -13,14 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Atoms Demo · 一句话生成可运行应用',
-  description: '借助多智能体赛马的方式，把一句需求变成可以直接运行、可以迭代、可以分享的网页应用。',
+  title: 'Atoms Demo · 多智能体应用生成器',
+  description: '一句话需求交给 2–3 路智能体并行生成，评审择优后可直接运行、继续迭代、分享导出。',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="zh-CN" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full bg-bg text-text">{children}</body>
     </html>
   );
 }

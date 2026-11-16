@@ -3,18 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Check,
-  Code2,
   Copy,
   Download,
   ExternalLink,
   Loader2,
-  MonitorPlay,
   RefreshCw,
   Send,
   Share2,
-  Sparkles,
-  Swords,
-  TerminalSquare,
   X,
 } from 'lucide-react';
 import { Logo } from '@/components/Logo';
@@ -93,20 +88,26 @@ function formatTime(iso: string): string {
   });
 }
 
+function versionLabel(version: VersionView): string {
+  const raw = version.title ?? version.prompt;
+
+  return raw.replace(/^v\d+\s*[·:：-]\s*/, '');
+}
+
 function scoreTone(score: number | null): string {
   if (score === null) {
-    return 'text-muted border-border bg-white/[0.03]';
+    return 'text-faint';
   }
 
   if (score >= 85) {
-    return 'text-success border-success/30 bg-success/10';
+    return 'text-success';
   }
 
   if (score >= 70) {
-    return 'text-warning border-warning/30 bg-warning/10';
+    return 'text-warning';
   }
 
-  return 'text-danger border-danger/30 bg-danger/10';
+  return 'text-danger';
 }
 
 export function Workspace({ initial, autoRun, initialLanes }: WorkspaceProps) {
@@ -422,280 +423,283 @@ export function Workspace({ initial, autoRun, initialLanes }: WorkspaceProps) {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-border bg-bg/85 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-4 px-4">
+      <header className="sticky top-0 z-20 border-b border-rule bg-bg/92 backdrop-blur">
+        <div className="flex h-[52px] w-full items-center gap-3 px-4">
           <Logo href="/app" />
-          <div className="hidden min-w-0 flex-1 items-center gap-2 sm:flex">
-            <span className="truncate text-sm text-muted">{project.title}</span>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            {initial.mockMode ? (
-              <span className="hidden rounded-full border border-warning/30 bg-warning/10 px-2.5 py-1 text-[11px] font-medium text-warning md:inline">
-                演示模式
-              </span>
-            ) : null}
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => void copyShareLink()}>
-              {copied ? <Check size={13} /> : <Share2 size={13} />}
+          <span className="hidden h-4 w-px bg-rule sm:block" aria-hidden="true" />
+          <span className="hidden min-w-0 flex-1 truncate text-[12.5px] text-muted sm:block">{project.title}</span>
+          <div className="ml-auto flex items-center gap-1">
+            {initial.mockMode ? <span className="tag tag-warn mr-1 hidden md:inline-flex">内置示例</span> : null}
+            <button type="button" className="btn btn-quiet btn-sm" onClick={() => void copyShareLink()}>
+              {copied ? <Check size={12} /> : <Share2 size={12} />}
               {copied ? '已复制' : '分享'}
             </button>
-            <a className="btn btn-ghost btn-sm" href={`/api/projects/${projectId}/export`}>
-              <Download size={13} />
+            <a className="btn btn-quiet btn-sm" href={`/api/projects/${projectId}/export`}>
+              <Download size={12} />
               导出
             </a>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto grid w-full max-w-[1600px] gap-4 p-4 xl:grid-cols-[400px_minmax(0,1fr)]">
-        <aside className="flex flex-col gap-4 xl:h-[calc(100vh-96px)] xl:overflow-y-auto xl:pr-1">
-          <section className="panel-strong p-4">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h2 className="flex items-center gap-2 text-sm font-semibold">
-                  <Swords size={15} className="text-accent-strong" />
-                  赛马模式
-                </h2>
-                <p className="mt-1 text-[11px] leading-relaxed text-muted">
-                  多路智能体并行生成，再按需求匹配度打分择优。
-                </p>
-              </div>
+      <main className="grid w-full xl:h-[calc(100vh-52px)] xl:grid-cols-[356px_minmax(0,1fr)]">
+        <aside className="border-rule xl:overflow-y-auto xl:border-r">
+          <section className="px-4 pt-4 pb-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[12.5px] font-semibold">赛道</h2>
               <button
                 type="button"
-                className="btn btn-ghost btn-sm"
+                className="btn btn-quiet btn-sm -mr-2"
                 disabled={running}
                 onClick={() => void startRace(initialLanes)}
               >
-                {running ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+                {running ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
                 {running ? '生成中' : '重新赛马'}
               </button>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2">
-              {lanes.map((lane) => {
+            <ul className="mt-1.5 border-t border-rule-soft">
+              {lanes.map((lane, index) => {
                 const variant = variants.find((item) => item.personaId === lane.id);
+                const isActive = activeVariantId === variant?.id;
+                const canSelect = Boolean(variant) && !running;
+
                 return (
-                  <button
-                    key={lane.id}
-                    type="button"
-                    disabled={!variant || running}
-                    onClick={() => variant && void selectVariant(variant)}
-                    className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
-                      activeVariantId === variant?.id
-                        ? 'border-accent/50 bg-accent-soft'
-                        : 'border-border bg-white/[0.02] hover:border-border-strong'
-                    } ${variant && !running ? 'cursor-pointer' : 'cursor-default'}`}
-                  >
-                    <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
-                      style={{ background: `${lane.accent}1f`, color: lane.accent }}
+                  <li key={lane.id}>
+                    <button
+                      type="button"
+                      disabled={!canSelect}
+                      onClick={() => variant && void selectVariant(variant)}
+                      className={`flex w-full items-start gap-3 border-b border-rule-soft py-2.5 text-left transition-colors ${
+                        isActive ? 'bg-white/[0.055]' : canSelect ? 'hover:bg-white/[0.03]' : ''
+                      } ${canSelect ? 'cursor-pointer' : 'cursor-default'}`}
                     >
-                      {lane.name.slice(0, 1)}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-1.5 text-xs font-semibold">
-                        {lane.name}
-                        {lane.status === 'running' ? (
-                          <Loader2 size={11} className="animate-spin text-accent-strong" />
-                        ) : null}
-                        {lane.status === 'done' ? <Check size={11} className="text-success" /> : null}
-                        {lane.status === 'failed' ? <X size={11} className="text-danger" /> : null}
+                      <span
+                        className="mt-0.5 block h-7 w-[2px] shrink-0"
+                        style={{ background: lane.accent, opacity: isActive ? 1 : 0.55 }}
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-baseline gap-2">
+                          <span className="num text-[10px] text-faint">0{index + 1}</span>
+                          <span className={`text-[12px] ${isActive ? 'font-semibold' : 'font-medium'}`}>{lane.name}</span>
+                          {lane.status === 'running' ? (
+                            <Loader2 size={10} className="animate-spin text-accent-strong" />
+                          ) : null}
+                          {lane.status === 'done' ? <Check size={10} className="text-success" /> : null}
+                          {lane.status === 'failed' ? <X size={10} className="text-danger" /> : null}
+                          {variant?.score !== null && variant?.score !== undefined ? (
+                            <span className={`num ml-auto text-[12px] ${scoreTone(variant.score)}`}>{variant.score}</span>
+                          ) : selectingId === variant?.id ? (
+                            <Loader2 size={11} className="ml-auto animate-spin text-faint" />
+                          ) : null}
+                        </span>
+                        <span className="mt-0.5 block truncate text-[11px] text-muted">
+                          {lane.status === 'failed'
+                            ? lane.error ?? '生成失败'
+                            : lane.status === 'running'
+                              ? '正在生成…'
+                              : variant?.reasoning ?? lane.tagline}
+                        </span>
                       </span>
-                      <span className="mt-0.5 block truncate text-[11px] text-muted">
-                        {lane.status === 'failed' ? lane.error ?? '生成失败' : variant?.reasoning ?? lane.tagline}
-                      </span>
-                    </span>
-                    {variant?.score !== null && variant?.score !== undefined ? (
-                      <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${scoreTone(variant.score)}`}>
-                        {variant.score}
-                      </span>
-                    ) : selectingId === variant?.id ? (
-                      <Loader2 size={12} className="animate-spin text-muted" />
-                    ) : null}
-                  </button>
+                    </button>
+                  </li>
                 );
               })}
-              {running && variants.length === 0 ? (
-                <div className="flex flex-col gap-2 pt-1">
-                  <div className="skeleton h-3 w-2/3" />
-                  <div className="skeleton h-3 w-1/2" />
-                </div>
-              ) : null}
-            </div>
+            </ul>
+
+            {running && variants.length === 0 ? (
+              <div className="flex flex-col gap-1.5 pt-3">
+                <div className="skeleton h-2.5 w-2/3" />
+                <div className="skeleton h-2.5 w-1/2" />
+              </div>
+            ) : null}
 
             {judging ? (
-              <p className="mt-3 flex items-center gap-2 text-[11px] text-muted">
-                <Loader2 size={12} className="animate-spin" />
+              <p className="mt-2.5 flex items-center gap-2 text-[11px] text-muted">
+                <Loader2 size={11} className="animate-spin" />
                 评审模型正在对比方案…
               </p>
             ) : null}
 
             {fallbackNotice ? (
-              <div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-[11px] leading-relaxed text-warning">
+              <p className="mt-2.5 border-l-2 border-warning/60 pl-2.5 text-[11px] leading-relaxed text-warning">
                 {fallbackNotice}
-              </div>
+              </p>
             ) : null}
 
             {runError ? (
-              <div className="mt-3 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-[11px] leading-relaxed text-danger">
+              <p className="mt-2.5 border-l-2 border-danger/60 pl-2.5 text-[11px] leading-relaxed text-danger">
                 {runError}
-                <button type="button" className="ml-2 underline" onClick={() => void startRace(initialLanes)}>
+                <button type="button" className="ml-1.5 underline" onClick={() => void startRace(initialLanes)}>
                   重试
                 </button>
-              </div>
+              </p>
             ) : null}
           </section>
 
-          <section className="panel-strong p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold">
-                <Sparkles size={15} className="text-accent-strong" />
-                对话式迭代
-              </h2>
-              <span className="text-[11px] text-muted">{versions.length} 个版本</span>
-            </div>
-            <p className="mt-1 text-[11px] leading-relaxed text-muted">
-              在结果上继续说「把主色换成蓝色」，会生成一个新版本，原版本保留。
-            </p>
-
-            <div className="mt-3 flex max-h-44 flex-col gap-1.5 overflow-y-auto pr-1">
-              {versions.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-[11px] text-muted">
-                  还没有版本，先跑一次赛马
-                </div>
-              ) : (
-                versions.map((version) => (
-                  <button
-                    key={version.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveVersionId(version.id);
-                      setActiveVariantId(null);
-                      setTab('preview');
-                    }}
-                    className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left transition ${
-                      activeVersionId === version.id
-                        ? 'border-accent/50 bg-accent-soft text-text'
-                        : 'border-border bg-white/[0.02] text-muted hover:border-border-strong hover:text-text'
-                    }`}
-                  >
-                    <span className="min-w-0 flex-1 truncate text-[11px]">{version.title ?? version.prompt}</span>
-                    <span className="shrink-0 text-[10px] text-muted">{formatTime(version.createdAt)}</span>
-                  </button>
-                ))
-              )}
+          <section className="border-t border-rule px-4 py-3.5">
+            <div className="flex items-baseline justify-between">
+              <h2 className="text-[12.5px] font-semibold">版本</h2>
+              <span className="num text-[10px] text-faint">{versions.length}</span>
             </div>
 
-            <div className="mt-3 flex flex-col gap-2">
-              <textarea
-                className="input textarea min-h-[76px]"
-                rows={3}
-                maxLength={500}
-                value={instruction}
-                disabled={!previewHtml || iterating}
-                placeholder={previewHtml ? '例如：把主色换成蓝色，并加上截止日期筛选' : '生成一个方案后即可继续修改'}
-                onChange={(event) => setInstruction(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-                    event.preventDefault();
-                    void iterate();
-                  }
-                }}
-              />
-              <button
-                type="button"
-                className="btn btn-primary w-full"
-                disabled={!previewHtml || iterating || instruction.trim().length < 2}
-                onClick={() => void iterate()}
-              >
-                {iterating ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
-                {iterating ? '正在生成新版本…' : '生成新版本'}
-              </button>
-              {iterateError ? <p className="text-[11px] text-danger">{iterateError}</p> : null}
+            {versions.length === 0 ? (
+              <p className="mt-2 text-[11px] leading-relaxed text-faint">还没有版本，先跑一次赛马。</p>
+            ) : (
+              <ul className="mt-1.5 max-h-[188px] overflow-y-auto border-t border-rule-soft pr-1">
+                {versions.map((version, index) => {
+                  const isActive = activeVersionId === version.id;
+
+                  return (
+                    <li key={version.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveVersionId(version.id);
+                          setActiveVariantId(null);
+                          setTab('preview');
+                        }}
+                        className={`flex w-full items-baseline gap-2.5 border-b border-rule-soft py-2 text-left transition-colors ${
+                          isActive ? 'bg-white/[0.055]' : 'hover:bg-white/[0.03]'
+                        }`}
+                      >
+                        <span className={`num w-[26px] shrink-0 pl-1 text-[10px] ${isActive ? 'text-accent-strong' : 'text-faint'}`}>
+                          v{index + 1}
+                        </span>
+                        <span className={`min-w-0 flex-1 truncate text-[11px] ${isActive ? 'text-text' : 'text-muted'}`}>
+                          {versionLabel(version)}
+                        </span>
+                        <span className="num shrink-0 pr-1 text-[10px] text-faint">{formatTime(version.createdAt)}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
+          <section className="border-t border-rule px-4 py-3.5">
+            <h2 className="text-[12.5px] font-semibold">需求原文</h2>
+            <div className="paper mt-2 px-3 py-2.5">
+              <p className="paper-quote text-[11.5px]">{project.prompt}</p>
             </div>
           </section>
 
-          <section className="panel p-4">
-            <h3 className="label">原始需求</h3>
-            <p className="mt-2 text-[12px] leading-relaxed text-muted">{project.prompt}</p>
+          <section className="border-t border-rule px-4 py-3.5">
+            <div className="flex items-baseline justify-between">
+              <h2 className="text-[12.5px] font-semibold">继续修改</h2>
+              <span className="num text-[10px] text-faint">⌘ / Ctrl + Enter</span>
+            </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted">
+              在结果上继续提要求，每次都生成一个新版本，旧的保留。
+            </p>
+
+            <textarea
+              className="field field-area mt-2 min-h-[70px]"
+              rows={3}
+              maxLength={500}
+              value={instruction}
+              disabled={!previewHtml || iterating}
+              placeholder={previewHtml ? '例如：把主色换成蓝色，并加上截止日期筛选' : '生成一个方案后即可继续修改'}
+              onChange={(event) => setInstruction(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                  event.preventDefault();
+                  void iterate();
+                }
+              }}
+            />
+
+            <button
+              type="button"
+              className="btn btn-primary mt-2 w-full"
+              disabled={!previewHtml || iterating || instruction.trim().length < 2}
+              onClick={() => void iterate()}
+            >
+              {iterating ? <Loader2 size={14} className="animate-spin" /> : <Send size={13} />}
+              {iterating ? '正在生成新版本…' : '生成新版本'}
+            </button>
+
+            {iterateError ? <p className="mt-2 text-[11px] text-danger">{iterateError}</p> : null}
           </section>
         </aside>
 
-        <section className="panel-strong flex min-h-[72vh] flex-col overflow-hidden xl:h-[calc(100vh-96px)]">
-          <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
-            <div className="flex rounded-lg border border-border bg-black/20 p-0.5">
+        <section className="flex min-h-[74vh] min-w-0 flex-col xl:min-h-0">
+          <div className="flex items-center gap-3 border-b border-rule px-4">
+            <div className="flex items-stretch gap-4">
               <button
                 type="button"
                 onClick={() => setTab('preview')}
-                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition ${
-                  tab === 'preview' ? 'bg-accent-soft text-accent-strong' : 'text-muted hover:text-text'
+                className={`-mb-px border-b-2 px-0.5 pt-3 pb-2 text-[12px] transition-colors ${
+                  tab === 'preview' ? 'border-accent text-text' : 'border-transparent text-muted hover:text-text'
                 }`}
               >
-                <MonitorPlay size={13} />
                 预览
               </button>
               <button
                 type="button"
                 onClick={() => setTab('code')}
-                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition ${
-                  tab === 'code' ? 'bg-accent-soft text-accent-strong' : 'text-muted hover:text-text'
+                className={`-mb-px border-b-2 px-0.5 pt-3 pb-2 text-[12px] transition-colors ${
+                  tab === 'code' ? 'border-accent text-text' : 'border-transparent text-muted hover:text-text'
                 }`}
               >
-                <Code2 size={13} />
                 代码
               </button>
             </div>
-            <span className="truncate text-xs text-muted">{activeLabel}</span>
-            <div className="ml-auto flex items-center gap-1.5">
+            <span className="min-w-0 truncate border-l border-rule pl-3 text-[11.5px] text-faint">{activeLabel}</span>
+            <div className="ml-auto flex items-center gap-1 pb-0.5">
               {tab === 'code' ? (
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => void copyCode()} disabled={!previewHtml}>
-                  {codeCopied ? <Check size={12} /> : <Copy size={12} />}
+                <button type="button" className="btn btn-quiet btn-sm" onClick={() => void copyCode()} disabled={!previewHtml}>
+                  {codeCopied ? <Check size={11} /> : <Copy size={11} />}
                   {codeCopied ? '已复制' : '复制'}
                 </button>
               ) : null}
-              <button type="button" className="btn btn-ghost btn-sm" onClick={openInNewTab} disabled={!previewHtml}>
-                <ExternalLink size={12} />
+              <button type="button" className="btn btn-quiet btn-sm" onClick={openInNewTab} disabled={!previewHtml}>
+                <ExternalLink size={11} />
                 新窗口
               </button>
             </div>
           </div>
 
-          <div className="relative min-h-0 flex-1 bg-[#0c0e16]">
+          <div className="min-h-0 flex-1 bg-bg-3 p-3">
             {previewHtml ? (
               tab === 'preview' ? (
-                <iframe
-                  title="生成应用预览"
-                  className="h-full w-full border-0 bg-white"
-                  sandbox="allow-scripts allow-forms allow-modals allow-popups"
-                  srcDoc={preparePreviewHtml(previewHtml)}
-                />
+                <div className="h-full w-full border border-rule-strong bg-white">
+                  <iframe
+                    title="生成应用预览"
+                    className="h-full w-full border-0 bg-white"
+                    sandbox="allow-scripts allow-forms allow-modals allow-popups"
+                    srcDoc={preparePreviewHtml(previewHtml)}
+                  />
+                </div>
               ) : (
-                <pre className="h-full w-full overflow-auto p-4 font-mono text-[12px] leading-relaxed text-[#c7d2e8]">
+                <pre className="h-full w-full overflow-auto border border-rule-strong bg-bg-3 p-3.5 text-[11.5px] leading-relaxed text-muted">
                   <code>{previewHtml}</code>
                 </pre>
               )
             ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+              <div className="flex h-full flex-col items-center justify-center gap-2.5 px-6 text-center">
                 {running ? (
                   <>
-                    <div className="flex items-center gap-2 text-sm text-text">
-                      <Loader2 size={16} className="animate-spin text-accent-strong" />
-                      智能体正在生成…
-                    </div>
-                    <p className="max-w-sm text-xs leading-relaxed text-muted">
-                      几路方案会陆续出现在左侧，全部完成后自动进入评审并选出最佳方案。
+                    <span className="flex items-center gap-2 text-[13px] text-text">
+                      <Loader2 size={14} className="animate-spin text-accent-strong" />
+                      智能体正在生成
+                    </span>
+                    <p className="max-w-[34ch] text-[11.5px] leading-relaxed text-muted">
+                      几路方案会陆续出现在左侧，全部完成后自动进入评审，选出最高分。
                     </p>
-                    <div className="mt-2 grid w-full max-w-md gap-2">
-                      <div className="skeleton h-4 w-full" />
-                      <div className="skeleton h-4 w-5/6" />
-                      <div className="skeleton h-4 w-2/3" />
+                    <div className="mt-2 grid w-full max-w-sm gap-1.5">
+                      <div className="skeleton h-3 w-full" />
+                      <div className="skeleton h-3 w-5/6" />
+                      <div className="skeleton h-3 w-2/3" />
                     </div>
                   </>
                 ) : (
                   <>
-                    <TerminalSquare size={22} className="text-muted" />
-                    <p className="text-sm font-medium">还没有生成结果</p>
-                    <p className="max-w-sm text-xs leading-relaxed text-muted">
-                      在左侧点击「重新赛马」，几路智能体会并行生成可直接运行的应用。
+                    <p className="text-[13px] font-medium">还没有生成结果</p>
+                    <p className="max-w-[34ch] text-[11.5px] leading-relaxed text-muted">
+                      在左侧点「重新赛马」，几路智能体会并行生成可直接运行的应用。
                     </p>
                   </>
                 )}

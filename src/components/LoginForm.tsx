@@ -43,33 +43,36 @@ export function LoginForm({ next }: { next: string }) {
 
   return (
     <form
-      className="flex w-full flex-col gap-4"
+      className="flex w-full flex-col gap-3.5"
       onSubmit={(event) => {
         event.preventDefault();
         void submit();
       }}
     >
-      <div className="flex flex-col gap-2">
-        <label htmlFor="nickname" className="label">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="nickname" className="text-[11px] text-faint">
           昵称
         </label>
         <input
           id="nickname"
-          className="input"
+          className="field"
           value={nickname}
           maxLength={20}
           autoFocus
           placeholder="例如：林一"
           onChange={(event) => setNickname(event.target.value)}
         />
-        <p className="text-xs leading-relaxed text-muted">
-          不需要邮箱和密码。昵称只用于区分你的工作区，数据保存在服务端数据库。
+        <p className="text-[11px] leading-relaxed text-muted">
+          不需要邮箱和密码。昵称只用来区分工作区，数据存在服务端数据库。
         </p>
       </div>
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
+
+      {error ? <p className="text-[11px] text-danger">{error}</p> : null}
+
       <button type="submit" className="btn btn-primary w-full" disabled={pending}>
-        {pending ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
+        {pending ? <Loader2 size={14} className="animate-spin" /> : null}
         进入工作台
+        {pending ? null : <ArrowRight size={13} />}
       </button>
     </form>
   );

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
 const EXAMPLES = [
   '我要一个带优先级、截止日和拖拽排序的项目看板',
@@ -20,7 +20,7 @@ export function HeroPrompt({ loggedIn }: { loggedIn: boolean }) {
     const trimmed = value.trim();
 
     if (trimmed.length < 4) {
-      setError('再多描述一点，至少 4 个字');
+      setError('再多写几个字，至少 4 个字');
       return;
     }
 
@@ -54,7 +54,12 @@ export function HeroPrompt({ loggedIn }: { loggedIn: boolean }) {
   }
 
   return (
-    <div className="panel-strong w-full rounded-2xl p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+    <div className="border border-rule bg-bg-2/40 transition-colors focus-within:border-rule-strong">
+      <div className="flex items-center justify-between border-b border-rule-soft px-3.5 py-2">
+        <span className="text-[11px] text-faint">需求</span>
+        <span className="num text-[10px] text-faint">⌘ / Ctrl + Enter 提交</span>
+      </div>
+
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -64,9 +69,10 @@ export function HeroPrompt({ loggedIn }: { loggedIn: boolean }) {
         <textarea
           value={prompt}
           onChange={(event) => setPrompt(event.target.value)}
-          className="input textarea border-0 bg-transparent px-4 pt-4 text-[15px] focus:shadow-none"
-          placeholder="描述你想要的应用，例如：一个带优先级和拖拽排序的项目看板……"
+          className="w-full resize-none bg-transparent px-3.5 py-3 text-[14px] leading-relaxed text-text outline-none placeholder:text-faint focus-visible:outline-none"
+          placeholder="例如：一个带优先级和拖拽排序的项目看板，能新增、完成和删除任务"
           rows={3}
+          maxLength={2000}
           onKeyDown={(event) => {
             if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
               event.preventDefault();
@@ -74,33 +80,35 @@ export function HeroPrompt({ loggedIn }: { loggedIn: boolean }) {
             }
           }}
         />
-        <div className="flex flex-wrap items-center justify-between gap-3 px-3 pb-3 pt-1">
-          <div className="flex flex-wrap gap-2">
+
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 border-t border-rule px-3.5 py-2.5">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
+            <span className="text-[11px] text-faint">试试</span>
             {EXAMPLES.map((example) => (
               <button
                 key={example}
                 type="button"
-                className="chip"
+                className="example"
+                title={example}
                 onClick={() => {
                   setPrompt(example);
                   setError(null);
                 }}
               >
-                <Sparkles size={12} />
-                {example.slice(0, 14)}…
+                {example.slice(0, 12)}…
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-[11px] text-muted sm:inline">⌘ + Enter 提交</span>
-            <button type="submit" className="btn btn-primary" disabled={pending}>
-              {pending ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
-              {loggedIn ? '开始生成' : '登录并生成'}
-            </button>
-          </div>
+
+          <button type="submit" className="btn btn-primary w-full sm:w-auto" disabled={pending}>
+            {pending ? <Loader2 size={14} className="animate-spin" /> : null}
+            {loggedIn ? '开始生成' : '登录并生成'}
+            {pending ? null : <ArrowRight size={13} />}
+          </button>
         </div>
       </form>
-      {error ? <p className="px-4 pb-3 text-xs text-danger">{error}</p> : null}
+
+      {error ? <p className="border-t border-rule-soft px-3.5 py-2 text-[11px] text-danger">{error}</p> : null}
     </div>
   );
 }
